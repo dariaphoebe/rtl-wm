@@ -1,0 +1,6 @@
+# Build artifacts
+*.o
+rtl
+
+# macOS
+.DS_Store

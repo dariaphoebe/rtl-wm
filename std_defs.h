@@ -68,8 +68,8 @@ typedef void	(*VoidFunc)();
 /*  string comparison macros
  */
 #define streql(str1,str2)  \
-    ( ( ( (str1) == NULL ) || ( str1[0] == NULL ) ) ?  \
-        ( ( (str2) == NULL ) || ( str2[0] == NULL ) ) :  \
+    ( ( ( (str1) == NULL ) || ( str1[0] == '\0' ) ) ?  \
+        ( ( (str2) == NULL ) || ( str2[0] == '\0' ) ) :  \
         ( ( (str2) != NULL ) && ( strcmp(str1,str2) == 0 ) ) )
 
 #define str_copy(str1,str2)  \

@@ -1,0 +1,77 @@
+# Makefile for rtl-wm on macOS with local liboldX
+#
+# Usage:
+#   make -f Makefile.macos
+#   make -f Makefile.macos clean
+#
+# Assumes liboldX is built in ../liboldX-1.0.1/
+
+# Paths to local liboldX build
+LIBOLDX_DIR = ../liboldX-1.0.1
+LIBOLDX_INC = $(LIBOLDX_DIR)/include
+LIBOLDX_LIB = $(LIBOLDX_DIR)/src/.libs
+
+# X11 from MacPorts
+X11_INC = /opt/local/include
+X11_LIB = /opt/local/lib
+
+CC = cc
+
+# Compiler flags:
+#   -std=gnu89        : Use C89 standard (required for K&R style code)
+#   -Wno-*            : Suppress warnings for old-style C code
+CFLAGS = -O -std=gnu89 \
+         -Wno-return-type \
+         -Wno-implicit-function-declaration \
+         -Wno-deprecated-non-prototype \
+         -Wno-int-conversion \
+         -Wno-pointer-to-int-cast \
+         -I$(LIBOLDX_INC) -I$(X11_INC)
+
+# Linker flags:
+#   -rpath            : Runtime library search path
+#   -headerpad_max_install_names : Allow install_name_tool to modify paths later
+LDFLAGS = -L$(LIBOLDX_LIB) -L$(X11_LIB) \
+          -Wl,-rpath,$(LIBOLDX_LIB) \
+          -Wl,-headerpad_max_install_names
+
+LIBS = -loldX -lX11 -lm
+
+SRCS = assoc.c bodyreg.c check.c check_grow.c check_mod.c check_shk.c \
+       client.c closed.c commit_op.c control.c current.c draw.c \
+       drawicon.c drawwin.c drawwin_d.c events.c evsave.c evstack.c \
+       frame.c goal.c gravity.c icons.c init_tws.c input.c interf.c \
+       interf_in.c layout.c manage.c manage_op.c manage_pro.c manage_st.c \
+       mem.c menu.c message.c open.c pause.c pcs_enum.c pcs_merge.c \
+       pcs_split.c pcs_updt.c pr.c profile.c property.c redirect.c \
+       region.c rtlmenu.c state.c til_create.c til_delete.c til_enlrg.c \
+       til_find.c til_nbrs.c til_panic.c til_shrink.c tilecrsr.c \
+       tilemenu.c tileopts.c twin_close.c twin_creat.c twin_desk.c \
+       twin_dump.c twin_init.c twin_ltst.c twin_list.c twin_misc.c \
+       twin_open.c twin_resat.c twin_rsz.c twin_set.c twin_slide.c \
+       twin_thrd.c twin_tmp.c twin_undo.c twin_util.c tool.c track_menu.c \
+       try_sweep.c try_grow.c try_place.c try_sat.c try_slide.c \
+       userglob.c useropts.c uwin.c win.c wsys.c xerror.c
+
+OBJS = $(SRCS:.c=.o)
+
+TARGET = rtl
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm -f $(OBJS) $(TARGET)
+
+# Fix library path to use absolute path for local liboldX
+# Run this after building if you want to move the binary
+fix-libpath:
+	install_name_tool -change /opt/local/lib/liboldX.6.dylib \
+		"$$(cd $(LIBOLDX_LIB) && pwd)/liboldX.6.dylib" $(TARGET)
+
+.PHONY: all clean fix-libpath

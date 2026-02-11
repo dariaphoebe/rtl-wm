@@ -42,7 +42,7 @@ typedef pointer Layoutp;
 
 #define strnullcpy( str1, str2 )  \
 {  \
-    str2[strlen(str2)-1] = NULL;  \
+    str2[strlen(str2)-1] = '\0';  \
     strcpy( str1, str2 );  \
 }
 
